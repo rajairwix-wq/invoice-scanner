@@ -230,12 +230,12 @@ STRICTLY RETURN ONLY JSON with no extra text. If any field is not found, return 
                       facingMode: facingMode,
                       frameRate: { ideal: 30 }
                     }}
-                    className="w-full max-w-2xl mx-auto rounded-lg border-2 border-gray-300 shadow-lg object-contain"
+                    className="w-full max-w-2xl mx-auto rounded-lg border-2 border-gray-300 shadow-lg aspect-video"
                     style={{
                       transform: 'scaleX(1)',
+                      objectFit: 'cover',
                       width: '100%',
-                      height: 'auto',
-                      maxHeight: '60vh'
+                      height: 'auto'
                     }}
                     onUserMedia={() => console.log('React-webcam: User media granted')}
                     onUserMediaError={(error) => {
@@ -268,9 +268,8 @@ STRICTLY RETURN ONLY JSON with no extra text. If any field is not found, return 
                     alt="Captured business card"
                     className="w-full max-w-2xl mx-auto rounded-lg border-2 border-green-400 shadow-lg object-contain"
                     style={{
-                      width: '100%',
-                      height: 'auto',
-                      maxHeight: '60vh'
+                      maxHeight: '70vh',
+                      minHeight: '300px'
                     }}
                   />
                   <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-green-500 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
