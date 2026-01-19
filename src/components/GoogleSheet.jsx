@@ -57,12 +57,13 @@ const GoogleSheet = () => {
 
     setIsProcessing(true);
     setError('');
+    let responseText = '';
 
     try {
       // Initialize Google Generative AI
       const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY);
       const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
+        model: "gemini-2.0-flash",
         generationConfig: {
           temperature: 0.1,
           maxOutputTokens: 500,
@@ -100,14 +101,61 @@ STRICTLY RETURN ONLY JSON with no extra text. If any field is not found, return 
       ]);
 
       const responseText = result.response.text();
-      const cleanJson = responseText.replace(/```json|```/g, "").trim();
-      const extractedData = JSON.parse(cleanJson);
+      let cleanJson = responseText.replace(/```json|```/g, "").trim();
+      
+      // Additional cleaning to handle common JSON parsing issues
+      cleanJson = cleanJson.replace(/[\u0000-\u001F\u007F-\u009F]/g, ""); // Remove control characters
+      cleanJson = cleanJson.replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t"); // Escape newlines and tabs
+      
+      // Try to extract JSON if it's wrapped in extra text
+      const jsonMatch = cleanJson.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        cleanJson = jsonMatch[0];
+      }
+      
+      // Fix common JSON formatting issues
+      cleanJson = cleanJson.replace(/(\w+):/g, '"$1":'); // Add quotes to unquoted property names
+      cleanJson = cleanJson.replace(/:\s*([^",\[\]\{\}][^",\[\]\{\}]*?)([,\]\}])/g, ': "$1"$2'); // Add quotes to unquoted string values
+      
+      console.log('Cleaned JSON:', cleanJson);
+      
+      let extractedData;
+      try {
+        extractedData = JSON.parse(cleanJson);
+      } catch (parseError) {
+        console.error('JSON parse failed, attempting manual extraction');
+        // Fallback: try to extract data manually
+        extractedData = {
+          company_name: '',
+          phone_number: '',
+          email: '',
+          contact_person_name: '',
+          website_url: '',
+          address: ''
+        };
+        
+        // Try to extract individual fields using regex
+        const fields = ['company_name', 'phone_number', 'email', 'contact_person_name', 'website_url', 'address'];
+        fields.forEach(field => {
+          const regex = new RegExp(`"${field}"\\s*:\\s*"([^"]*)"`, 'i');
+          const match = cleanJson.match(regex);
+          if (match) {
+            extractedData[field] = match[1];
+          }
+        });
+      }
 
       setExtractedData(extractedData);
 
     } catch (error) {
       console.error('Error extracting business card:', error);
-      setError('Error processing business card. Please try again.');
+      console.error('Response text:', responseText);
+      
+      if (error instanceof SyntaxError) {
+        setError('Invalid response format from AI. Please try again.');
+      } else {
+        setError('Error processing business card. Please try again.');
+      }
     } finally {
       setIsProcessing(false);
     }
