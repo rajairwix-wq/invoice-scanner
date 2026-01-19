@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import Webcam from 'react-webcam';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { IoCameraOutline } from 'react-icons/io5';
 
 const GoogleSheet = () => {
   const [capturedImage, setCapturedImage] = useState(null);
@@ -28,11 +29,7 @@ const GoogleSheet = () => {
 
   const capturePhoto = useCallback(() => {
     if (webcamRef.current) {
-      const imageSrc = webcamRef.current.getScreenshot({
-        width: 1920,
-        height: 1080,
-        quality: 0.95
-      });
+      const imageSrc = webcamRef.current.getScreenshot();
 
       if (imageSrc) {
         setCapturedImage(imageSrc);
@@ -176,7 +173,7 @@ STRICTLY RETURN ONLY JSON with no extra text. If any field is not found, return 
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-6 sm:mb-8 text-gray-800">Business Card Scanner</h1>
-       
+
 
         {/* Error Message */}
         {error && (
@@ -186,23 +183,21 @@ STRICTLY RETURN ONLY JSON with no extra text. If any field is not found, return 
         )}
 
         {/* Camera Section */}
-        <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6">
           {/* Step 1: Initial State */}
           {currentStep === 1 && (
-            <div className="text-center pt-10">
+            <div className="text-center">
               <div className="mb-6">
-                <div className="w-32 h-32 mx-auto bg-gray-200 rounded-full flex items-center justify-center">
-                  <span className="text-4xl">📷</span>
+                <div className="size-26 mx-auto border-2 border-gray-200 rounded-lg flex items-center justify-center">
+                  <IoCameraOutline className="size-16 text-gray-600" />
                 </div>
               </div>
               <button
                 onClick={startCamera}
                 className="w-full sm:w-auto px-3 sm:px-6 py-2 sm:py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2 mx-auto text-sm sm:text-base"
               >
-                <span>🎥</span>
                 <span>Open Camera</span>
               </button>
-              <p className="mt-4 text-gray-600">Click to start camera and capture business card</p>
             </div>
           )}
 
@@ -225,17 +220,16 @@ STRICTLY RETURN ONLY JSON with no extra text. If any field is not found, return 
                     audio={false}
                     screenshotFormat="image/jpeg"
                     videoConstraints={{
-                      width: { ideal: 1280 },
-                      height: { ideal: 720 },
+                      width: { ideal: 1920 },
+                      height: { ideal: 1080 },
                       facingMode: facingMode,
                       frameRate: { ideal: 30 }
                     }}
                     className="w-full max-w-2xl mx-auto rounded-lg border-2 border-gray-300 shadow-lg aspect-video"
                     style={{
-                      transform: 'scaleX(1)',
-                      objectFit: 'cover',
+                      objectFit:'cover',
                       width: '100%',
-                      height: 'auto'
+                      height: '100%'
                     }}
                     onUserMedia={() => console.log('React-webcam: User media granted')}
                     onUserMediaError={(error) => {
@@ -249,7 +243,6 @@ STRICTLY RETURN ONLY JSON with no extra text. If any field is not found, return 
                     onClick={capturePhoto}
                     className="w-full sm:w-auto px-3 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2 text-sm sm:text-base"
                   >
-                    <span>📸</span>
                     <span>Capture Photo</span>
                   </button>
                 </div>
@@ -260,46 +253,36 @@ STRICTLY RETURN ONLY JSON with no extra text. If any field is not found, return 
           {/* Step 3: Captured Image with Details */}
           {currentStep === 3 && capturedImage && (
             <div>
-              <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 text-gray-700">Captured Business Card</h2>
               <div className="space-y-4">
-                <div className="relative">
+                <div className="w-full max-w-2xl mx-auto flex justify-center">
                   <img
                     src={capturedImage}
                     alt="Captured business card"
-                    className="w-full max-w-2xl mx-auto rounded-lg border-2 border-green-400 shadow-lg object-contain"
-                    style={{
-                      maxHeight: '70vh',
-                      minHeight: '300px'
-                    }}
+                    className="max-w-full h-auto object-cover rounded-lg border-2 border-gray-300 shadow-lg aspect-video"
                   />
-                  <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-green-500 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
-                    ✅ Photo Captured
-                  </div>
                 </div>
-                <div className="flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4">
+
+                <div className="flex justify-center items-center gap-2 sm:gap-4">
                   <button
                     onClick={extractBusinessCard}
                     disabled={isProcessing}
-                    className="w-full sm:w-auto px-4 sm:px-8 py-3 sm:py-4 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
+                    className="w-full sm:w-auto px-3 sm:px-6 py-2 sm:py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:bg-white disabled:text-gray-600 disabled:border disabled:border-gray-200 disabled:cursor-not-allowed transition-all transform hover:scale-105 flex items-center justify-center space-x-2"
                   >
                     {isProcessing ? (
                       <>
-                        <span>⏳</span>
-                        <span>Processing...</span>
+                        <span className="text-sm sm:text-base">Processing...</span>
                       </>
                     ) : (
                       <>
-                        <span>🔍</span>
-                        <span>Extract Business Info</span>
+                        <span className="text-sm sm:text-base">Extract</span>
                       </>
                     )}
                   </button>
                   <button
                     onClick={resetCapture}
-                    className="w-full sm:w-auto px-4 sm:px-8 py-3 sm:py-4 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
+                    className="w-full sm:w-auto px-3 sm:px-6 py-2 sm:py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2"
                   >
-                    <span>🔄</span>
-                    <span>Retake Photo</span>
+                    <span className="text-sm sm:text-base">Retake Photo</span>
                   </button>
                 </div>
               </div>
