@@ -266,7 +266,11 @@ STRICTLY RETURN ONLY JSON with no extra text. If any field is not found, return 
                   <img
                     src={capturedImage}
                     alt="Captured business card"
-                    className="w-full max-w-2xl mx-auto rounded-lg border-2 border-green-400 shadow-lg aspect-video object-cover"
+                    className="w-full max-w-2xl mx-auto rounded-lg border-2 border-green-400 shadow-lg object-contain"
+                    style={{
+                      maxHeight: '70vh',
+                      minHeight: '300px'
+                    }}
                   />
                   <div className="absolute top-2 sm:top-4 left-2 sm:left-4 bg-green-500 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
                     ✅ Photo Captured
